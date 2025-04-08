@@ -1,6 +1,6 @@
 ﻿import socket
 import concurrent.futures
-from time import time
+from time import time 
 from typing import List, Tuple
 
 class NetworkScanner:
