@@ -1,0 +1,8 @@
+{
+    "Device-92": {
+        "ip_address": "192.168.45.55",
+        "open_ports": [581, 164, 892],
+        "vulnerabilities": true,
+        "recommendations": "Fermez les ports inutilisés et utilisez des mots de passe forts."
+    }
+}

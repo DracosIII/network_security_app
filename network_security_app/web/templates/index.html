@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Security Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Network Security Dashboard</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Informations collectées</h2>
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>Nom du périphérique</th>
+                        <th>Adresse IP</th>
+                        <th>Ports ouverts</th>
+                        <th>Vulnérabilités</th>
+                        <th>Recommandations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="5">Chargement des données...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <section>
+            <h2>Historique des actions</h2>
+            <table id="actions-table">
+                <thead>
+                    <tr>
+                        <th>Type d'action</th>
+                        <th>Détails</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="3">Chargement des actions...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <script src="/static/scripts.js"></script>
+</body>
+</html>

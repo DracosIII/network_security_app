@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord - Sniffi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+        /* Section des commandes */
+        .commands-section {
+            margin-top: 30px;
+        }
+
+        #command-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        #command-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #command-output {
+            background: #f4f4f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <header class="dashboard-header">
+        <div class="container">
+            <img src="{{ url_for('static', filename='Sniffi.png') }}" alt="Logo Sniffi" class="logo-header">
+            <nav>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('logout') }}">Déconnexion</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="dashboard-main">
+        <h2>Bienvenue, {{ username }} !</h2>
+        <section class="devices-section">
+            <h3>Appareils connectés</h3>
+            <table class="devices-table" id="devices-table" border="1">
+                <thead>
+                    <tr>
+                        <th>Nom du périphérique</th>
+                        <th>Adresse IP</th>
+                        <th>Adresse MAC</th>
+                        <th>Ports ouverts</th>
+                    </tr>
+                </thead>
+                <tbody id="devices-tbody">
+                    <!-- Les données seront insérées ici -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Nouvelle section pour afficher les logs d'attaque et de sniffing -->
+        <section id="logs-section">
+            <h3>Logs d'attaque et sniffing</h3>
+            <div id="logs-container" style="background: #f4f4f9; padding: 10px; height: 200px; overflow-y: auto;">
+                Chargement des logs...
+            </div>
+        </section>
+
+        <section class="command-bar">
+            <h3>Barre de commande</h3>
+            <form id="command-form" method="POST" action="{{ url_for('execute_command') }}">
+                <label for="command">Commande :</label>
+                <select id="command" name="command">
+                    <option value="start_scan">Lancer un scan</option>
+                    <option value="stop_scan">Arrêter le scan</option>
+                    <option value="start_attack">Lancer une attaque</option>
+                    <option value="stop_attack">Arrêter l'attaque</option>
+                    <option value="start_sniffing">Lancer le sniffing</option>
+                    <option value="stop_sniffing">Arrêter le sniffing</option>
+                </select>
+                <!-- Sélection de la carte réseau pour le scan -->
+                <select id="network-prefix" name="network_prefix" style="display:none; width:180px;">
+                    <!-- Les options seront ajoutées dynamiquement -->
+                </select>
+                <!-- Champ pour IP cible, visible pour attaque ET sniffing -->
+                <input type="text" id="attack-ips" name="attack_ips" placeholder="IP cible(s) (ex: 192.168.1.10;192.168.1.11)" style="display:none; width:250px;">
+                <!-- Champ durée pour attaque -->
+                <input type="number" id="attack-timer" name="attack_timer" min="1" max="120" placeholder="Durée (s, max 120)" style="display:none; width:120px;">
+                <button type="submit">Exécuter</button>
+            </form>
+            <div id="command-output">
+                <h4>Résultat :</h4>
+                <pre id="output"></pre>
+            </div>
+        </section>
+    </main>
+
+    <footer class="dashboard-footer">
+        <p>© 2024 Sniffi. Tous droits réservés.</p>
+    </footer>
+
+    <script>
+        // Déclare socket UNE SEULE FOIS ici
+        const socket = io();
+
+        // Mise à jour des données en temps réel
+        socket.on("update_data", (devices) => {
+            const tableBody = document.querySelector("#devices-table tbody");
+            tableBody.innerHTML = ""; // Efface les anciennes données
+            devices.forEach(device => {
+                const row = `
+                    <tr>
+                        <td>${device.name}</td>
+                        <td>${device.ip_address}</td>
+                        <td>${device.mac_address}</td>
+                        <td>${device.open_ports}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        });
+
+        // Demande des données en temps réel
+        setInterval(() => {
+            socket.emit("request_data");
+        }, 5000); // Toutes les 5 secondes
+
+        // Gestion de l'exécution des commandes
+        const commandForm = document.getElementById("command-form");
+        const commandInput = document.getElementById("command-input");
+        const commandOutput = document.getElementById("command-output");
+
+        commandForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const command = commandInput.value;
+            socket.emit("execute_command", { command });
+            commandInput.value = ""; // Réinitialise le champ
+        });
+
+        socket.on("command_result", (data) => {
+            if (data.status === "success") {
+                commandOutput.textContent = `Résultat :\n${data.output}`;
+            } else {
+                commandOutput.textContent = `Erreur :\n${data.output}`;
+            }
+        });
+
+        // Demander une mise à jour initiale
+        socket.emit('request_update');
+
+        // Affiche le champ IP pour attaque/sniffing et timer pour attaque
+        const commandSelect = document.getElementById('command');
+        const attackIpsInput = document.getElementById('attack-ips');
+        const attackTimerInput = document.getElementById('attack-timer');
+        const networkPrefixSelect = document.getElementById('network-prefix');
+        commandSelect.addEventListener('change', function() {
+            if (this.value === 'start_scan') {
+                networkPrefixSelect.style.display = 'inline-block';
+                attackIpsInput.style.display = 'none';
+                attackTimerInput.style.display = 'none';
+            } else if (this.value === 'start_attack') {
+                networkPrefixSelect.style.display = 'none';
+                attackIpsInput.style.display = 'inline-block';
+                attackTimerInput.style.display = 'inline-block';
+            } else if (this.value === 'start_sniffing') {
+                networkPrefixSelect.style.display = 'none';
+                attackIpsInput.style.display = 'inline-block';
+                attackTimerInput.style.display = 'none';
+            } else {
+                networkPrefixSelect.style.display = 'none';
+                attackIpsInput.style.display = 'none';
+                attackTimerInput.style.display = 'none';
+            }
+        });
+
+        // Affichage temps réel des logs sniffing/attaque
+        const logsContainer = document.getElementById('logs-container');
+        socket.on("log_update", (data) => {
+            const p = document.createElement("p");
+            p.textContent = data.message;
+            logsContainer.appendChild(p);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        });
+
+        // Récupère les préfixes réseau disponibles via une API Flask
+        async function fetchNetworkPrefixes() {
+            const response = await fetch('/network_prefixes');
+            const prefixes = await response.json();
+            networkPrefixSelect.innerHTML = '';
+            prefixes.forEach(prefix => {
+                const option = document.createElement('option');
+                option.value = prefix;
+                option.textContent = prefix;
+                networkPrefixSelect.appendChild(option);
+            });
+        }
+        // Charger au démarrage
+        fetchNetworkPrefixes();
+    </script>
+    <script>
+        const form = document.getElementById('command-form');
+        const output = document.getElementById('output');
+    
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            output.textContent = data.result;
+        });
+    </script>
+</body>
+</html>
