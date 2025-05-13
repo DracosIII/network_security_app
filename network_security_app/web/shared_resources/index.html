@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Sniffy</title>
+  <link rel="stylesheet" href="./assets/css/main.css">
+  <link rel="icon" href="./assets/image/favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <img src="./assets/image/Sniffi.png" alt="Logo My Sniffy" class="logo">
+      <nav>
+        <button onclick="location.href='./login.html'">Log In</button>
+        <button>Download</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="title">
+      <h1>Welcome to My Sniffy</h1>
+      <p>Your ultimate network supervisor tool.</p>
+      <a href="#features" class="btn">Learn More</a>
+    </section>
+
+    <section id="features" class="features">
+      <h2>Features</h2>
+      <ul>
+        <li>Monitor connected devices with ease.</li>
+        <li>View IP and MAC addresses in real time.</li>
+        <li>Track incoming and outgoing packets efficiently.</li>
+        <li>Generate comprehensive logs for better security.</li>
+      </ul>
+      <button id="dark-mode-btn" class="toggle-dark-mode">Dark Mode</button>
+    </section>
+
+    <section class="testimonials">
+      <h2>What Our Users Say</h2>
+      <div class="testimonial">
+        <blockquote>&ldquo;Amazing tool! Helped me manage my network easily.&rdquo;</blockquote>
+        <cite>&mdash; Network Admin</cite>
+      </div>
+      <div class="testimonial">
+        <blockquote>&ldquo;Intuitive design and super useful features!&rdquo;</blockquote>
+        <cite>&mdash; IT Specialist</cite>
+      </div>
+      <div class="testimonial">
+        <blockquote>&ldquo;A must-have for network enthusiasts.&rdquo;</blockquote>
+        <cite>&mdash; Tech Blogger</cite>
+      </div>
+    </section>
+
+    <section class="login">
+      <h2>Log In</h2>
+      <form id="login-form">
+        <input type="text" id="login-username" placeholder="Nom d'utilisateur" required>
+        <input type="password" id="login-password" placeholder="Mot de passe" required>
+        <button type="submit" class="btn">Se Connecter</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 My Sniffy. All rights reserved.</p>
+  </footer>
+
+  <script src="./assets/js/script.js"></script>
+</body>
+</html>
